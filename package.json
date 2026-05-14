@@ -3,7 +3,7 @@
   "displayName": "Theme Auto Switcher",
   "description": "Automatically switch VS Code themes every 30 minutes.",
   "version": "0.0.1",
-  "publisher": "local",
+  "publisher": "shidengyun",
   "engines": {
     "vscode": "^1.80.0"
   },
