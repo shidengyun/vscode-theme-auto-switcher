@@ -1,0 +1,86 @@
+{
+  "name": "vscode-theme-auto-switcher",
+  "displayName": "Theme Auto Switcher",
+  "description": "Automatically switch VS Code themes every 30 minutes.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:themeAutoSwitcher.start",
+    "onCommand:themeAutoSwitcher.stop",
+    "onCommand:themeAutoSwitcher.switchNow",
+    "onCommand:themeAutoSwitcher.showInstalledThemes",
+    "onCommand:themeAutoSwitcher.copyInstalledThemes"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "themeAutoSwitcher.start",
+        "title": "Theme Auto Switcher: Start"
+      },
+      {
+        "command": "themeAutoSwitcher.stop",
+        "title": "Theme Auto Switcher: Stop"
+      },
+      {
+        "command": "themeAutoSwitcher.switchNow",
+        "title": "Theme Auto Switcher: Switch Now"
+      },
+      {
+        "command": "themeAutoSwitcher.showInstalledThemes",
+        "title": "Theme Auto Switcher: Show Installed Themes"
+      },
+      {
+        "command": "themeAutoSwitcher.copyInstalledThemes",
+        "title": "Theme Auto Switcher: Copy Installed Themes"
+      }
+    ],
+    "configuration": {
+      "title": "Theme Auto Switcher",
+      "properties": {
+        "themeAutoSwitcher.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable automatic theme switching."
+        },
+        "themeAutoSwitcher.intervalMinutes": {
+          "type": "number",
+          "default": 30,
+          "minimum": 1,
+          "description": "How often to switch themes, in minutes."
+        },
+        "themeAutoSwitcher.switchOnStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Switch to the next theme as soon as the extension starts."
+        },
+        "themeAutoSwitcher.useInstalledThemes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Rotate through all color themes installed on this computer. If disabled, only themeAutoSwitcher.themes is used."
+        },
+        "themeAutoSwitcher.themes": {
+          "type": "array",
+          "default": [
+            "Default Dark Modern",
+            "Default Light Modern",
+            "Abyss",
+            "Solarized Dark",
+            "Solarized Light"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Theme names to rotate through. Names must match installed VS Code themes exactly."
+        }
+      }
+    }
+  }
+}
