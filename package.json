@@ -2,8 +2,12 @@
   "name": "vscode-theme-auto-switcher",
   "displayName": "Theme Auto Switcher",
   "description": "Automatically switch VS Code themes every 30 minutes.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "shidengyun",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shidengyun/vscode-theme-auto-switcher.git"
+  },
   "engines": {
     "vscode": "^1.80.0"
   },
