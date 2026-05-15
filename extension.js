@@ -21,7 +21,11 @@ function activate(context) {
       vscode.window.showInformationMessage('Theme Auto Switcher stopped.');
     }),
     vscode.commands.registerCommand('themeAutoSwitcher.switchNow', async () => {
-      await switchTheme();
+      await switchAppearance();
+      scheduleNextSwitch();
+    }),
+    vscode.commands.registerCommand('themeAutoSwitcher.switchFontNow', async () => {
+      await switchFont();
       scheduleNextSwitch();
     }),
     vscode.commands.registerCommand('themeAutoSwitcher.showInstalledThemes', showInstalledThemes),
@@ -48,8 +52,17 @@ function getConfig() {
     intervalMinutes: Math.max(1, config.get('intervalMinutes', 30)),
     switchOnStart: config.get('switchOnStart', false),
     useInstalledThemes: config.get('useInstalledThemes', true),
-    themes: config.get('themes', []).filter(Boolean)
+    themes: normalizeStringList(config.get('themes', [])),
+    fontFamilies: normalizeStringList(config.get('fontFamilies', []))
   };
+}
+
+function normalizeStringList(items) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return items.map((item) => (typeof item === 'string' ? item.trim() : '')).filter(Boolean);
 }
 
 function updateEnabledSetting(enabled) {
@@ -69,15 +82,16 @@ function start() {
   }
 
   const themes = getThemePool(config);
+  const fonts = getFontPool(config);
 
-  if (themes.length < 2) {
-    updateStatus('needs themes');
-    vscode.window.showWarningMessage('Theme Auto Switcher needs at least two themes in settings.');
+  if (themes.length < 2 && fonts.length < 2) {
+    updateStatus('needs settings');
+    vscode.window.showWarningMessage('Theme Auto Switcher needs at least two themes or two fonts in settings.');
     return;
   }
 
   if (config.switchOnStart) {
-    switchTheme();
+    switchAppearance();
   }
 
   scheduleNextSwitch();
@@ -101,9 +115,10 @@ function scheduleNextSwitch() {
   const config = getConfig();
 
   const themes = getThemePool(config);
+  const fonts = getFontPool(config);
 
-  if (!config.enabled || themes.length < 2) {
-    updateStatus(config.enabled ? 'needs themes' : 'stopped');
+  if (!config.enabled || (themes.length < 2 && fonts.length < 2)) {
+    updateStatus(config.enabled ? 'needs settings' : 'stopped');
     return;
   }
 
@@ -112,9 +127,15 @@ function scheduleNextSwitch() {
   updateStatus();
 
   timer = setTimeout(async () => {
-    await switchTheme();
+    await switchAppearance();
     scheduleNextSwitch();
   }, delay);
+}
+
+async function switchAppearance() {
+  await switchTheme();
+  await switchFont();
+  updateStatus();
 }
 
 async function switchTheme() {
@@ -135,12 +156,38 @@ async function switchTheme() {
   updateStatus();
 }
 
+async function switchFont() {
+  const fonts = getFontPool();
+
+  if (fonts.length < 2) {
+    return;
+  }
+
+  const editorConfig = vscode.workspace.getConfiguration('editor');
+  const terminalConfig = vscode.workspace.getConfiguration('terminal.integrated');
+  const currentEditorFont = editorConfig.get('fontFamily');
+  const currentTerminalFont = terminalConfig.get('fontFamily');
+  const editorIndex = fonts.indexOf(currentEditorFont);
+  const terminalIndex = fonts.indexOf(currentTerminalFont);
+  const currentIndex = editorIndex !== -1 ? editorIndex : terminalIndex;
+  const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % fonts.length;
+  const nextFont = fonts[nextIndex];
+
+  await editorConfig.update('fontFamily', nextFont, vscode.ConfigurationTarget.Global);
+  await terminalConfig.update('fontFamily', nextFont, vscode.ConfigurationTarget.Global);
+  updateStatus();
+}
+
 function getThemePool(config = getConfig()) {
   const installedThemes = config.useInstalledThemes ? getInstalledThemes().map((theme) => theme.label) : [];
   const configuredThemes = config.themes;
   const themes = installedThemes.length >= 2 ? installedThemes : configuredThemes;
 
   return Array.from(new Set(themes));
+}
+
+function getFontPool(config = getConfig()) {
+  return Array.from(new Set(config.fontFamilies));
 }
 
 function getInstalledThemes() {
@@ -225,9 +272,9 @@ function updateStatus(state) {
     return;
   }
 
-  if (state === 'needs themes') {
+  if (state === 'needs settings') {
     statusBarItem.text = '$(warning) Theme switcher';
-    statusBarItem.tooltip = 'Add at least two themes to themeAutoSwitcher.themes';
+    statusBarItem.tooltip = 'Add at least two themes or fonts to Theme Auto Switcher settings';
     statusBarItem.show();
     return;
   }
@@ -236,8 +283,8 @@ function updateStatus(state) {
     ? Math.max(1, Math.ceil((nextSwitchAt - Date.now()) / 60000))
     : getConfig().intervalMinutes;
 
-  statusBarItem.text = `$(color-mode) Theme in ${minutes}m`;
-  statusBarItem.tooltip = 'Click to switch theme now';
+  statusBarItem.text = `$(color-mode) Appearance in ${minutes}m`;
+  statusBarItem.tooltip = 'Click to switch theme and font now';
   statusBarItem.show();
 }
 

@@ -1,8 +1,8 @@
 {
   "name": "vscode-theme-auto-switcher",
   "displayName": "Theme Auto Switcher",
-  "description": "Automatically switch VS Code themes every 30 minutes.",
-  "version": "0.0.2",
+  "description": "Automatically switch VS Code themes and editor/terminal fonts.",
+  "version": "0.0.3",
   "publisher": "shidengyun",
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
     "onCommand:themeAutoSwitcher.start",
     "onCommand:themeAutoSwitcher.stop",
     "onCommand:themeAutoSwitcher.switchNow",
+    "onCommand:themeAutoSwitcher.switchFontNow",
     "onCommand:themeAutoSwitcher.showInstalledThemes",
     "onCommand:themeAutoSwitcher.copyInstalledThemes"
   ],
@@ -35,7 +36,11 @@
       },
       {
         "command": "themeAutoSwitcher.switchNow",
-        "title": "Theme Auto Switcher: Switch Now"
+        "title": "Theme Auto Switcher: Switch Theme and Font Now"
+      },
+      {
+        "command": "themeAutoSwitcher.switchFontNow",
+        "title": "Theme Auto Switcher: Switch Font Now"
       },
       {
         "command": "themeAutoSwitcher.showInstalledThemes",
@@ -83,6 +88,14 @@
             "type": "string"
           },
           "description": "Theme names to rotate through. Names must match installed VS Code themes exactly."
+        },
+        "themeAutoSwitcher.fontFamilies": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Font family values to rotate through for both editor.fontFamily and terminal.integrated.fontFamily. Leave empty to disable font switching."
         }
       }
     }
